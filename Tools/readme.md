@@ -1,7 +1,7 @@
 # Herramientas
 ---
 
-En esta sección pondremos herramientas interesantes que se deberían revisar para poder incorporarlas al poryecto.
+En esta sección pondremos herramientas interesantes que se deberían revisar para poder incorporarlas al proyecto.
 
 ## Three.js Editor
 ***
