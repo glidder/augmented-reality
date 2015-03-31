@@ -1,4 +1,4 @@
-//https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#g372q5
+// https://blockly-demo.appspot.com/static/demos/blockfactory/index.html#g372q5
 Blockly.Blocks['cube'] = {
   init: function() {
     this.setHelpUrl('http://www.example.com/');
