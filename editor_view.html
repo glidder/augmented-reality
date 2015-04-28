@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <HTML>
-<script src="./js/jquery/jquery-2.0.2.min.js"></script>
-<script src='./lib/threejs/three.min.js'></script>
-<script src="./lib/video/webrtc_adapter.js"></script>
-<script src="./lib/video/streamvideo.js"></script>
-<script src="./lib/skarf/skarf.min.js"></script>
-<script src="./lib/js-aruco/svd.js"></script>
-<script src="./lib/js-aruco/posit1.js"></script>
-<script src="./lib/js-aruco/cv.js"></script>
-<script src="./lib/js-aruco/aruco.js"></script>
+<script src="js/jquery/jquery-2.0.2.min.js"></script>
+<script src='js/threejs/three.min.js'></script>
+<script src="js/video/webrtc_adapter.js"></script>
+<script src="js/video/streamvideo.js"></script>
+<script src="js/skarf/skarf.min.js"></script>
+<script src="js/js-aruco/svd.js"></script>
+<script src="js/js-aruco/posit1.js"></script>
+<script src="js/js-aruco/cv.js"></script>
+<script src="js/js-aruco/aruco.js"></script>
 <script type="text/javascript">
     var MARKER_SIZE = 35.0; //millimeters
 
@@ -64,9 +64,9 @@
 
         var markerImages = {
             'JSARToolKit': [
-            THREE.ImageUtils.loadTexture('markers/jsartoolkit/22.jpg'),
-            THREE.ImageUtils.loadTexture('markers/jsartoolkit/81.jpg'),
-            THREE.ImageUtils.loadTexture('markers/jsartoolkit/63.jpg')
+            THREE.ImageUtils.loadTexture('markers/jsartoolkit/22.png'),
+            THREE.ImageUtils.loadTexture('markers/jsartoolkit/81.png'),
+            THREE.ImageUtils.loadTexture('markers/jsartoolkit/63.png')
         ],
             'js-aruco': [
             THREE.ImageUtils.loadTexture('markers/js-aruco/1001.png'),
@@ -302,6 +302,14 @@
 	camera.position.z = 4
     var hemiLight = new THREE.HemisphereLight( 0x0000ff, 0x00ff00, 0.6 ); 
     scene.add(hemiLight);
+    
+    //get canvas
+    
+    setupThreejsTrackingScene();
+    setupMainScene();
+    setupSkarf();
+    setupVideo();
+    streamVideo(video);
     render();
     
 	// the function called to run the generatedCode
@@ -370,6 +378,7 @@
         <div id="threejs-container"></div>
         <div class="caption">[ Alt+LMB: rotate ] [ Alt+MMB: pan ] [ Alt+RMB: zoom ]</div>
     </div>
+    <div class="mainCanvas"></div>
     <div class="invisible" id="video-container">
         <video id="mainVideo" width="640" height="480" autoplay="autoplay" muted="true"></video>
     </div>
