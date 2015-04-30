@@ -1,0 +1,3 @@
+marker files: 446.png, 923.png, 1001.png
+credits: skarf.js
+https://github.com/skeelogy/skarf.js/blob/master/markers/js-aruco
