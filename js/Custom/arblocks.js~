@@ -54,6 +54,7 @@ Blockly.JavaScript['skarf'] = function(block) {
   var statements_relations = Blockly.JavaScript.statementToCode(block, 'relations');
   var text_main = block.getFieldValue('main');
   // TODO: Assemble JavaScript into code variable.
-  var code = '...';
+  var code = '{\n\"mainMarkerId\": \"'+text_main+'\",\n'+
+  			 '\"models\": {\n'+statements_relations.substring(0, statements_relations.length - 1)+'\n}\n}';
   return code;
 };

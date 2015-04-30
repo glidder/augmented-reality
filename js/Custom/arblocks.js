@@ -25,7 +25,7 @@ Blockly.JavaScript['relation'] = function(block) {
   // JavaScript into code variable.
   var code = '\n\"'+text_num+'\":{\n'+
 			 '\"name\":\"'+dropdown_object+'\",\n'+
-			 '\"url\": \"models/'+dropdown_object+'/'+dropdown_object+'.js\",\n'+
+			 '\"url\": \"models/'+dropdown_object+'/'+dropdown_object+'_bin.js\",\n'+
 			 '\"type\": \"json_bin\",\n'+
 			 '\"translate\": [0, 0, 0],\n'+
 			 '\"rotate\": [0, 0, 0],\n'+
