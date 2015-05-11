@@ -24,7 +24,7 @@
 
       function init() {
         Blockly.inject(document.body, {
-          path: '../../', 
+          //path: '../../', 
           toolbox: document.getElementById('toolbox')
         });
         // Dispatch the event.
@@ -37,9 +37,32 @@
     <xml id="toolbox" style="display: none">
       <!-- Minecraft Category -->
       <category name='Skarf'>
-        <block type="skarf">
+        <block type="marker">
+        	<value name="id">
+        		<block type="math_number">
+					<field name="NUM">446</field>
+        		</block>
+        	</value>
         </block>
-        <block type="relation">
+        <block type="load">
+        	<value name="id">
+        		<block type="math_number">
+					<field name="NUM">446</field>
+        		</block>
+        	</value>
+        	<value name="obj">
+        		<block type="text">
+        			<field name="TEXT">house_15</field>
+        		</block>
+        	</value>
+        </block>
+      </category>
+      <category name='Datos'>
+		<block type="math_number">
+			<field name="NUM">446</field>
+        </block>
+        <block type="text">
+        	<field name="TEXT">house_15</field>
         </block>
       </category>
     </xml>
