@@ -170,13 +170,20 @@
 
         //updatePose("pose1", pose.bestError, pose.bestRotation, pose.bestTranslation);
         //updatePose("pose2", pose.alternativeError, pose.alternativeRotation, pose.alternativeTranslation);
-        
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //step += 0.025;
         
         //model.rotation.z -= step;
+        $.getScript("my_lovely_script.js", function(){
+
+            alert("Script loaded and executed.");
+
+            // Use anything defined in the loaded script...
+        });
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       }*/
-      if(markers.length>0)
-      	console.log("marker",markers);
+      for(var m=0;m<markers.length;++m)
+      	console.log("marker",markers[i].id);
       texture.children[0].material.map.needsUpdate = true;
     };
     
@@ -239,7 +246,6 @@
     function transformCorners(corners){
     	var j;
     	for (j = 0; j<corners.length;++j){
-    		console.log(corners[j].x,"lEEl",coners[j].x-(canvas.width/2));
     		corners[j].x = corners[j].x - (canvas.width / 2);
           	corners[j].y = (canvas.height / 2) - corners[j].y;
     	}
