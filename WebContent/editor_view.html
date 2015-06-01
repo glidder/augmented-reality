@@ -16,12 +16,12 @@
 
     <!--load AR libraries-->
     <script type="text/javascript" src="js/js-aruco/svd.js"></script>
-    <script type="text/javascript" src="js/js-aruco/posit1.js"></script>
+    <script type="text/javascript" src="js/js-aruco/posit2.js"></script>
     <script type="text/javascript" src="js/js-aruco/cv.js"></script>
     <script type="text/javascript" src="js/js-aruco/aruco.js"></script>
 
     <script>
-    var video, canvas, context, imageData, detector, posit;
+    var image, video, canvas, context, imageData, detector, posit;
     var scene, renderer, camera, model, texture;
     var step = 0.0;
     var modelSize = 35.0; //millimeters
@@ -82,7 +82,9 @@
     };
     
     function snapshot(){
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      //context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      image = document.getElementById("image");
+      context.drawImage(image, 0, 0);
       imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     };
     
@@ -126,7 +128,8 @@
     };
     
     function createTexture(){
-      var texture = new THREE.Texture(video),
+      //var texture = new THREE.Texture(video),
+      var texture = new THREE.ImageUtils.loadTexture("test.png"),
           object = new THREE.Object3D(),
           geometry = new THREE.PlaneGeometry(1.0, 1.0, 0.0),
           material = new THREE.MeshBasicMaterial( {map: texture, depthTest: false, depthWrite: false} ),
@@ -183,7 +186,7 @@
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       }*/
       for(var m=0;m<markers.length;++m)
-      	console.log("marker",markers[i].id);
+      	console.log("marker",markers[m].id);
       texture.children[0].material.map.needsUpdate = true;
     };
     
@@ -221,7 +224,7 @@
     function tick(){
       requestAnimationFrame(tick);
       
-      if (video.readyState === video.HAVE_ENOUGH_DATA){
+      //if (video.readyState === video.HAVE_ENOUGH_DATA){
         snapshot();
 
         var markers = detector.detect(imageData);
@@ -229,7 +232,7 @@
         updateScene(markers);
         
         render();
-      }
+      //}
     };
     
     window.onload = onLoad;
@@ -275,6 +278,7 @@
 
 <body>
 	<video id="video" width=640 height=480 autoplay="true" style="display:none;"></video>
+	<img id="image" width=640 height=480 src="test.png" style="display:none;"></img>
 	<div style="width: 100%;">
     <div style="width: 650px; margin-left:auto; margin-right:auto;">
     <div class="invisible">
