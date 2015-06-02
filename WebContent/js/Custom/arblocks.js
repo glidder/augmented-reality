@@ -18,7 +18,7 @@ Blockly.JavaScript['marker'] = function(block) {
   var value_id = Blockly.JavaScript.valueToCode(block, 'id', Blockly.JavaScript.ORDER_ATOMIC);
   var statements_consequence = Blockly.JavaScript.statementToCode(block, 'consequence');
   // TODO: Assemble JavaScript into code variable.
-  var code = 'if(markers[i].id == \''+value_id+'\'){'+
+  var code = 'if(this.findMarker('+value_id+')>=0){'+
   				statements_consequence+'}';
   return code;
 };
@@ -48,15 +48,9 @@ Blockly.JavaScript['load'] = function(block) {
   var value_obj = Blockly.JavaScript.valueToCode(block, 'obj', Blockly.JavaScript.ORDER_ATOMIC);
   var value_id = Blockly.JavaScript.valueToCode(block, 'id', Blockly.JavaScript.ORDER_ATOMIC);
   // TODO: Assemble JavaScript into code variable.
-  var code = 'for(k=0;k<markers.length;++k){'+
-  				'if(markers[k].id==\''+value_id+'\'){'+
-  				'corners = transformCorners(markers[k].corners);'+
-  				'pose = posit.pose(corners);'+
-  				'if(!map['+value_obj+']){'+
-  				'console.log("Creating new model "+'+value_obj+');'+
-  				'map['+value_obj+']=createModel('+value_obj+');'+
-  				'scene.add(map['+value_obj+']);}'+
-  				'updateObject(map['+value_obj+'], pose.bestRotation, pose.bestTranslation);}}';
+  var code = 	'var k=this.findMarker('+value_id+');'+
+  				'if(k>=0){'+
+  				'this.setObjectMarker('+value_obj+',k);}';
   return code;
 };
 
@@ -85,16 +79,7 @@ Blockly.JavaScript['animate'] = function(block) {
   var value_animation = Blockly.JavaScript.valueToCode(block, 'animation', Blockly.JavaScript.ORDER_ATOMIC);
   var value_obj = Blockly.JavaScript.valueToCode(block, 'obj', Blockly.JavaScript.ORDER_ATOMIC);
   // TODO: Assemble JavaScript into code variable.
-  var code = 'var '+value_animation.substring(1,value_animation.length-1)+';'+
-  				'if(!map['+value_animation+']){'+
-  				'$.ajax({url: "./models/'+value_animation.substring(1,value_animation.length-1)+
-  				'.js", dataType: "script",async: false,'+
-  				'success:function(){'+
-				//'animate('+value_obj+');'+
-        	 	'map['+value_animation+']=animate;'+
-        	 	'console.log("Creating new animation "+'+value_animation+');'+
-        	 	'}});}'+
-        	 	'map['+value_animation+']('+value_obj+');';
+  var code = 'this.runAnimation('+value_animation+','+value_obj+');';
   return code;
 };
 
