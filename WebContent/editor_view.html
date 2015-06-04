@@ -24,12 +24,13 @@
 	<script type="text/javascript" src="js/BAM.js"></script>
 	
     <script>
-    var image, video, bam;
-    var step = 0.0;
+    var video, bam;
     
+    /**
+     * Function that starts the execution once the page is loaded
+     */
     function onLoad(){
       video = document.getElementById("video");
-      image = document.getElementById("image");
       
       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       if (navigator.getUserMedia){
@@ -37,6 +38,9 @@
       }
     };
     
+    /**
+     * Initialisation function
+     */
     function init(){
       navigator.getUserMedia({video:true}, 
         function (stream){
@@ -52,24 +56,34 @@
         }
       );
 
+      //Create the BAM object
       var camera = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
-      var directionalLight = new THREE.DirectionalLight(0xffffff);
-      directionalLight.position.set(1, 1, 1).normalize();
+      var image = document.getElementById("image");
 
       bam = new BAM(image,"canvas","container",camera);
+
+      //Adding light to the scene
+      var directionalLight = new THREE.DirectionalLight(0xffffff);
+      directionalLight.position.set(1, 1, 1).normalize();
       bam.sceneAdd(directionalLight);
-      var  cube = new THREE.Mesh( new THREE.CubeGeometry( 200, 200, 200 ), new THREE.MeshNormalMaterial() );
-      bam.sceneAdd( cube );
+
+      //Start the main loop
       window.requestAnimationFrame(loop);
     };
     
     window.onload = onLoad;
     
+    /**
+     * Main loop function
+     */
     function loop(){
       bam.tick();
       requestAnimationFrame(loop);
     }
 
+    /**
+     * Run button function (incorporates the generated code to the main loop)
+     */
     window.run = function run(generatedCode){
         bam.evaluate(generatedCode);
    }
