@@ -5,7 +5,7 @@
 //function(){
 
 	/**
-	 * MAP class
+	 * MAP class //Artifacts??
 	 *
 	function MAP(){
 		this.map = {};
@@ -15,7 +15,11 @@
 
 		
 	}*/
-
+	
+	/**
+	 * Markers class
+	 */
+	 
 	/**
 	 * BAM class
 	 */
