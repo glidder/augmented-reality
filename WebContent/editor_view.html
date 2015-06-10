@@ -20,11 +20,14 @@
     <script type="text/javascript" src="js/js-aruco/cv.js"></script>
     <script type="text/javascript" src="js/js-aruco/aruco.js"></script>
 
-	<!--load blockly/js-aruco manager library-->
-	<script type="text/javascript" src="js/BAM.js"></script>
-	
+    <!--load augmented reality coordinator library-->
+    <script type="text/javascript" src="js/ARC.js"></script>
+    <!--load the implementations of the ARC "interfaces"-->
+    <script type="text/javascript" src="js/ArucoInterface.js"></script>
+
+
     <script>
-    var video, bam;
+    var video, arc;
     
     /**
      * Function that starts the execution once the page is loaded
@@ -42,6 +45,8 @@
      * Initialisation function
      */
     function init(){
+
+      //Stablishing the video stream
       navigator.getUserMedia({video:true}, 
         function (stream){
           if (window.webkitURL) {
@@ -56,38 +61,45 @@
         }
       );
 
-      //Create the BAM object
-      var camera = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
-      var image = document.getElementById("image");
+      //Creating the ARC object
 
-      bam = new BAM(image,"canvas","container",camera);
-      //bam = new BAM(video,"canvas","container",camera);
+      var canvas = document.getElementById("canvas"),
+          container = document.getElementById("container"),
+          ARlibrary = new ArucoInterface(35.0, canvas.style.width);
+      //var camera = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
+
+      //arc = new ARC(video,"canvas","container",/*camera,*/ARlibrary);
+      //For testing purposes, comment the previous line and uncomment the following two
+            var image = document.getElementById("image");
+            arc = new ARC(image,canvas,container,/*camera,*/ARlibrary);
+      /**/
 
       //Adding light to the scene
       var directionalLight = new THREE.DirectionalLight(0xffffff);
       directionalLight.position.set(1, 1, 1).normalize();
-      bam.sceneAdd(directionalLight);
+      arc.sceneAdd(directionalLight);
 
       //Start the main loop
       window.requestAnimationFrame(loop);
     };
     
-    window.onload = onLoad;
-    
     /**
      * Main loop function
      */
     function loop(){
-      bam.tick();
+      arc.tick();
       requestAnimationFrame(loop);
     }
 
     /**
-     * Run button function (incorporates the generated code to the main loop)
+     * Run button function
+     * Incorporates the generated code to the main loop by evaluating it from the ARC object.
      */
     window.run = function run(generatedCode){
-        bam.evaluate(generatedCode);
-   }
+        arc.evaluate(generatedCode);
+    }
+
+    window.onload = onLoad;
     </script>
 </head>
 
