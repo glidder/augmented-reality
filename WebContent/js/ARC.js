@@ -53,18 +53,21 @@ missingFunctionsError.prototype.constructor = missingFunctionsError;
  * Inherits from THREE.Object3D
  */
 function Model(name){
-	THREE.Object3D.call(this);
-	var loader = new THREE.JSONLoader(),
+	//THREE.Object3D.call(this);
+	THREE.Object3D.apply(this, arguments);
+	var object = this,
+		loader = new THREE.JSONLoader(),
 		mesh;
 
 	loader.load("./models/"+name+"/"+name+".js", function (geometry, materials) {
 			mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial( materials ));
+			object.add(mesh);
 			mesh.scale.set( 0.5, 0.5, 0.5 );
 		}, "models/"+name+"/");
 
-	this.add(mesh)
 };
-Model.prototype = Object.create( THREE.Object3D.prototype );
+//Model.prototype = Object.create( THREE.Object3D.prototype );
+Model.prototype = new THREE.Object3D();
 
 /**?????????????
  * MAP class ???
@@ -92,7 +95,7 @@ function ARC(source,canvas,container,/*camera,*/ARlibrary){
     this.renderer= new THREE.WebGLRenderer();
     this.renderer.setClearColor(0xffff00, 1);
     this.renderer.setSize(this.canvas.width, this.canvas.height);
-    document.getElementById(container.id).appendChild(this.renderer.domElement);
+    container.appendChild(this.renderer.domElement);
     this.scene = new THREE.Scene();
     //this.camera = camera;
     this.camera = new THREE.PerspectiveCamera(40, this.canvas.width / this.canvas.height, 1, 1000);
@@ -115,6 +118,7 @@ function ARC(source,canvas,container,/*camera,*/ARlibrary){
      */
     this.updateScene = function(){
   		console.log("Active signals: ",this.ARl.getActiveSignalsId().toString());
+
   		this.texture.children[0].material.map.needsUpdate = true;
     };
 };
@@ -159,6 +163,13 @@ ARC.prototype = {
 	    for (var i in this.map){
 	    	if(this.map[i].animationrotationz)
 	    		this.map[i].rotation.z+=this.map[i].animationrotationz;
+	    	if(this.map[i].animscalez){
+	    		this.map[i].rotation.x+=this.map[i].animationrotationx;
+	    		this.map[i].rotation.y+=this.map[i].animationrotationy;
+	    		this.map[i].scale.z*=this.map[i].animscalez;
+	    		this.map[i].scale.x*=this.map[i].animscalex;
+	    		this.map[i].scale.y*=this.map[i].animscaley;
+	    	}
 	    }
 	},
 
@@ -223,9 +234,9 @@ ARC.prototype = {
 		var translation = pose.bestTranslation;
 		if(!this.map[object]){
 			console.log("Creating new model "+object);
-			//this.map[object]=new Model(object);
-			//console.log(this.map[object]);
-			this.map[object]=this.createModel(object);
+			this.map[object]=new Model(object);
+			//this.map[object]=this.createModel(object);
+			//console.log("Instance of Object3D: " + ( this.map[object] instanceof THREE.Object3D) );
 			this.scene.add(this.map[object]);
 		}
 		this.map[object].scale.x = 35.0; //MODEL SIZE SHOULD BE IN MAP/AMAP

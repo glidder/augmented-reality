@@ -65,7 +65,7 @@
 
       var canvas = document.getElementById("canvas"),
           container = document.getElementById("container"),
-          ARlibrary = new ArucoInterface(35.0, canvas.style.width);
+          ARlibrary = new ArucoInterface(35.0, parseInt(canvas.style.width));
       //var camera = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
 
       //arc = new ARC(video,"canvas","container",/*camera,*/ARlibrary);

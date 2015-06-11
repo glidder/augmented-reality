@@ -21,7 +21,7 @@ function ArucoInterface(modelSize, canvasWidth){
 ArucoInterface.prototype = {
 	getActiveSignalsId: function(){
 		var ids = [];
-		for (i in this.markers)
+		for (var i=0; i<this.markers.length;++i)
 			ids.push(this.markers[i].id);
 		return ids;
 	},
@@ -31,7 +31,7 @@ ArucoInterface.prototype = {
 	},
 
 	findSignalById: function(marker_id){ // NECESSARY ???????????????????????????
-		for (i in this.markers){//(var i=0; i<this.markers.length;++i){
+		for (var i=0; i<this.markers.length;++i){
 			if (this.markers[i].id == marker_id){
 				return i;
 			}
