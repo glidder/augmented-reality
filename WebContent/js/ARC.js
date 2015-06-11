@@ -53,7 +53,6 @@ missingFunctionsError.prototype.constructor = missingFunctionsError;
  * Inherits from THREE.Object3D
  */
 function Model(name){
-	//THREE.Object3D.call(this);
 	THREE.Object3D.apply(this, arguments);
 	var object = this,
 		loader = new THREE.JSONLoader(),
@@ -62,12 +61,28 @@ function Model(name){
 	loader.load("./models/"+name+"/"+name+".js", function (geometry, materials) {
 			mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial( materials ));
 			object.add(mesh);
-			mesh.scale.set( 0.5, 0.5, 0.5 );
+			//mesh.scale.set( 0.5, 0.5, 0.5 );
 		}, "models/"+name+"/");
 
 };
-//Model.prototype = Object.create( THREE.Object3D.prototype );
 Model.prototype = new THREE.Object3D();
+Model.prototype.updatePose = function(){
+	if(this.animationrotationz)
+    	this.rotation.z+=this.animationrotationz;
+    if(this.animscalez){
+    	this.rotation.x+=this.animationrotationx;
+    	this.rotation.y+=this.animationrotationy;
+    	this.scale.z*=this.animscalez;
+    	this.scale.x*=this.animscalex;
+    	this.scale.y*=this.animscaley;
+    }
+};
+Model.prototype.setScale = function(x,y,z){
+	this.scale.x = x;
+	this.scale.y = y;
+	this.scale.z = z;
+}
+	
 
 /**?????????????
  * MAP class ???
@@ -145,32 +160,9 @@ ARC.prototype = {
 		this.imageData = this.context.getImageData(0,0,this.canvas.width,this.canvas.height);
 	},
 
-	createModel: function(name){ 
-		var object = new THREE.Object3D(),
-			mesh,
-			loader = new THREE.JSONLoader();
-
-		loader.load("./models/"+name+"/"+name+".js", function (geometry, materials) {
-			mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial( materials ));
-			object.add(mesh);
-			mesh.scale.set( 0.5, 0.5, 0.5 );
-		}, "models/"+name+"/");
-
-		return object;
-	},
-
 	updateObjects: function(){ //JUST CALL THE INDIVIDUAL OBJECT'S ONES??????????
-	    for (var i in this.map){
-	    	if(this.map[i].animationrotationz)
-	    		this.map[i].rotation.z+=this.map[i].animationrotationz;
-	    	if(this.map[i].animscalez){
-	    		this.map[i].rotation.x+=this.map[i].animationrotationx;
-	    		this.map[i].rotation.y+=this.map[i].animationrotationy;
-	    		this.map[i].scale.z*=this.map[i].animscalez;
-	    		this.map[i].scale.x*=this.map[i].animscalex;
-	    		this.map[i].scale.y*=this.map[i].animscaley;
-	    	}
-	    }
+	    for (var i in this.map)
+	    	this.map[i].updatePose();
 	},
 
 	updatePose: function(id, error, rotation, translation){ //NO NEED TO BE INSIDE
@@ -188,16 +180,6 @@ ARC.prototype = {
 	                + " yaw: " + Math.round(-yaw * 180.0/Math.PI)
 	                + " pitch: " + Math.round(-pitch * 180.0/Math.PI)
 	                + " roll: " + Math.round(roll * 180.0/Math.PI);
-	},
-
-	transformCorners: function(corners){ //NO NEED TO BE INSIDE
-    	var j;
-    	for (j = 0; j<corners.length;++j){
-    		corners[j].x = corners[j].x - (canvas.width / 2);
-          	corners[j].y = (canvas.height / 2) - corners[j].y;
-    	}
-
-    	return corners;
 	},
 
 	evaluate: function(generatedCode){ //Change to something like newUpdateBehaviour ?
@@ -227,22 +209,17 @@ ARC.prototype = {
 		//window.requestAnimationFrame(this.tick());
 	},
 
-	setObjectMarker: function(object, marker_i){ //WITH THE NEW ONES THIS WILL BE DEPRECATED!!!!!!!!!!!!
-		var corners = this.transformCorners(this.ARl.markers[marker_i].corners);
-		var pose = this.ARl.posit.pose(corners);
+	setObjectMarker: function(object, marker_id){ //WITH THE NEW ONES THIS WILL BE DEPRECATED!!!!!!!!!!!!
+		var pose = this.ARl.getPose(marker_id);
 		var rotation = pose.bestRotation;
 		var translation = pose.bestTranslation;
 		if(!this.map[object]){
 			console.log("Creating new model "+object);
 			this.map[object]=new Model(object);
-			//this.map[object]=this.createModel(object);
-			//console.log("Instance of Object3D: " + ( this.map[object] instanceof THREE.Object3D) );
 			this.scene.add(this.map[object]);
 		}
-		this.map[object].scale.x = 35.0; //MODEL SIZE SHOULD BE IN MAP/AMAP
-	    this.map[object].scale.y = 35.0;
-	    this.map[object].scale.z = 35.0;
-	      
+		this.map[object].setScale(35.0,35.0,35.0);
+	    //this.map[object].setRotation()
 	    this.map[object].rotation.x = -Math.asin(-rotation[1][2]);
 	    this.map[object].rotation.y = -Math.atan2(rotation[0][2], rotation[2][2]);
 	    this.map[object].rotation.z = Math.atan2(rotation[1][0], rotation[1][1]);

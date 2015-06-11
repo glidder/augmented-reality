@@ -62,17 +62,16 @@
       );
 
       //Creating the ARC object
-
       var canvas = document.getElementById("canvas"),
           container = document.getElementById("container"),
-          ARlibrary = new ArucoInterface(35.0, parseInt(canvas.style.width));
-      //var camera = new THREE.PerspectiveCamera(40, canvas.width / canvas.height, 1, 1000);
+          ARlibrary = new ArucoInterface(35.0, parseInt(canvas.style.width), parseInt(canvas.style.height));
 
-      //arc = new ARC(video,"canvas","container",/*camera,*/ARlibrary);
+      arc = new ARC(video,canvas,container,ARlibrary);
       //For testing purposes, comment the previous line and uncomment the following two
+      /*
             var image = document.getElementById("image");
-            arc = new ARC(image,canvas,container,/*camera,*/ARlibrary);
-      /**/
+            arc = new ARC(image,canvas,container,ARlibrary);
+      */
 
       //Adding light to the scene
       var directionalLight = new THREE.DirectionalLight(0xffffff);
@@ -111,7 +110,6 @@
     <div class="invisible">
     	<canvas id="canvas" style="width: 640px; height: 480px; float: left; border: solid 1px black;"></canvas></div>
       <div id="container" style="width: 640px; height: 480px; float: left; border: solid 1px black; background: green;"></div>
-      <!--div style="clear: both;"></div-->
     </div>
   </div>
 </body>
