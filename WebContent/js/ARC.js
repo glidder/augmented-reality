@@ -40,10 +40,14 @@ Object.defineProperty(Object.prototype, 'listMissingFunctions', {
  */
 function missingFunctionsError(offender,offended){
 	this.name = "missingFunctionsError";
-	this.message = offended.constructor.name+" complains about "+offender.constructor.name+
-				 " missing the following necessary functions:\n"+
-				   offender.listMissingFunctions(offended.listInterface()).join("(),")+"()";
+	if(typeof offender == "string"){ //COULD BE BETTER
+		this.message = offender + " is missing the following necessary functions:\n"+ offended;
+	} else {
+		this.message = offended.constructor.name+" complains about "+offender.constructor.name+
+					 " missing the following necessary functions:\n"+
+					   offender.listMissingFunctions(offended.listInterface()).join("(),")+"()";
 	}
+}
 missingFunctionsError.prototype = Object.create(Error.prototype);
 missingFunctionsError.prototype.constructor = missingFunctionsError;
 
@@ -61,35 +65,48 @@ function Model(name){
 	loader.load("./models/"+name+"/"+name+".js", function (geometry, materials) {
 			mesh = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial( materials ));
 			object.add(mesh);
-			//mesh.scale.set( 0.5, 0.5, 0.5 );
 		}, "models/"+name+"/");
 
+	this.base = { position : {x:0,y:0,z:0}, rotation : {x:0,y:0,z:0} };
+	this.relative = { position : {x:0,y:0,z:0}, rotation : {x:0,y:0,z:0} };
 };
 Model.prototype = new THREE.Object3D();
-Model.prototype.updatePose = function(){
-	if(this.animationrotationz)
-    	this.rotation.z+=this.animationrotationz;
-    if(this.animscalez){
-    	this.rotation.x+=this.animationrotationx;
-    	this.rotation.y+=this.animationrotationy;
-    	this.scale.z*=this.animscalez;
-    	this.scale.x*=this.animscalex;
-    	this.scale.y*=this.animscaley;
-    }
+Model.prototype.update = function(){
+	for(var i in this.base.position){
+		this.position[i] = this.base.position[i]+this.relative.position[i];
+		this.rotation[i] = this.base.rotation[i]+this.relative.rotation[i];
+		this.relative.position[i]=0;
+		this.relative.rotation[i]=0;
+	}
 };
 Model.prototype.setScale = function(x,y,z){
 	this.scale.x = x;
 	this.scale.y = y;
 	this.scale.z = z;
-}
-	
-
-/**?????????????
- * MAP class ???
- *??????????????
-function MAP(){
-	this.map = {};
-};*/
+};
+Model.prototype.setBasePose = function(pos_x,pos_y,pos_z,rot_x,rot_y,rot_z){
+	this.base.position.x = pos_x;
+	this.base.position.y = pos_y;
+	this.base.position.z = pos_z;
+	this.base.rotation.x = rot_z;
+	this.base.rotation.y = rot_y;
+	this.base.rotation.z = rot_z;
+};
+Model.prototype.translate = function(pos_x,pos_y,pos_z){
+	this.relative.position.x += pos_x;
+	this.relative.position.y += pos_y;
+	this.relative.position.z += pos_z;
+};
+Model.prototype.rotate = function(rot_x,rot_y,rot_z){
+	this.relative.rotation.x += rot_z;
+	this.relative.rotation.y += rot_y;
+	this.relative.rotation.z += rot_z;
+};
+Model.prototype.rescale = function(x,y,z){
+	this.scale.x*=x;
+	this.scale.y*=y;
+	this.scale.z*=z;
+};
 	
 /**
  * ARC class (Augmented Reality Coordinator)
@@ -103,7 +120,7 @@ function ARC(source,canvas,container,/*camera,*/ARlibrary){
 	this.context= this.canvas.getContext("2d");
     //Checking that ARlibrary implements the "interface"
     if(ARlibrary.implements(this.listInterface()))
-    	this.ARl = ARlibrary; //RENAME????????????
+    	this.ARl = ARlibrary;
     else
     	throw new missingFunctionsError(ARlibrary,this);
     //Creating Renderer //Move out of here??? //To LibraryInterface???
@@ -112,19 +129,27 @@ function ARC(source,canvas,container,/*camera,*/ARlibrary){
     this.renderer.setSize(this.canvas.width, this.canvas.height);
     container.appendChild(this.renderer.domElement);
     this.scene = new THREE.Scene();
-    //this.camera = camera;
+    //Creating the screen for showing the camera snapshots
+    var texture = new THREE.Texture(this.source),
+    	geometry = new THREE.PlaneGeometry(1.0, 1.0, 0.0),
+    	material = new THREE.MeshBasicMaterial( {map: texture, depthTest: false, depthWrite: false} ),
+    	mesh = new THREE.Mesh(geometry, material);
+    this.texture = new THREE.Object3D()
+    this.texture.position.z = -1;
+    this.texture.add(mesh);
+    this.scene.add(this.texture);
+    this.imageData;
+    //Adding the camera to the scene
     this.camera = new THREE.PerspectiveCamera(40, this.canvas.width / this.canvas.height, 1, 1000);
     this.scene.add(this.camera);
-    this.texture = this.createTexture();
-    this.scene.add(this.texture);
-    this.imageData; 
-
+    //Adding light to the scene
+    var directionalLight = new THREE.DirectionalLight(0xffffff);
+    directionalLight.position.set(1, 1, 1).normalize();
+    this.scene.add(directionalLight);
     //Structure for storing all loaded 3D models.
-    //this.map = new MAP();
-    this.map = {};	//Structure for all Models
+    this.map = {};
     //Structure for storing all loaded external animations.
-    this.amap = {};	//Structure for all animations
-    //this.markers;	//Move to the ARInterface implementation!!!!!!!!!!!!!!!!!!!!!!!!!!
+    this.amap = {};
 
     /**
      * Function that updates the Scene.
@@ -133,82 +158,58 @@ function ARC(source,canvas,container,/*camera,*/ARlibrary){
      */
     this.updateScene = function(){
   		console.log("Active signals: ",this.ARl.getActiveSignalsId().toString());
-
-  		this.texture.children[0].material.map.needsUpdate = true;
     };
 };
-
 ARC.prototype = {
+	/**
+	 * Function that returns a list of the names of all necessary methods for ARlibrary
+	 */
 	listInterface: function(){//IMPLEMENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		return ["getActiveSignalsId","detectSignals","findSignalById"];
+		return ["getActiveSignalsId","detectSignals","getPose"];
 	},
 
-	createTexture: function(){
-		var texture = new THREE.Texture(this.source),
-			object = new THREE.Object3D(),
-    		//geometry = new THREE.PlaneGeometry(this.canvas.width/this.canvas.height, this.canvas.height/this.canvas.width, 0.0),
-     		geometry = new THREE.PlaneGeometry(1.0, 1.0, 0.0),
-     		material = new THREE.MeshBasicMaterial( {map: texture, depthTest: false, depthWrite: false} ),
-     		mesh = new THREE.Mesh(geometry, material);
-		object.position.z = -1;
- 		object.add(mesh);
- 		return object;
-	},
-
-	snapshot: function(){
-		this.context.drawImage(this.source, 0, 0, this.canvas.width, this.canvas.height);
-		this.imageData = this.context.getImageData(0,0,this.canvas.width,this.canvas.height);
-	},
-
-	updateObjects: function(){ //JUST CALL THE INDIVIDUAL OBJECT'S ONES??????????
-	    for (var i in this.map)
-	    	this.map[i].updatePose();
-	},
-
-	updatePose: function(id, error, rotation, translation){ //NO NEED TO BE INSIDE
-	    var yaw = -Math.atan2(rotation[0][2], rotation[2][2]);
-	    var pitch = -Math.asin(-rotation[1][2]);
-	    var roll = Math.atan2(rotation[1][0], rotation[1][1]);
-	      
-	    var d = document.getElementById(id);
-	    d.innerHTML = " error: " + error
-	                + "<br/>"
-	                + " x: " + (translation[0] | 0)
-	                + " y: " + (translation[1] | 0)
-	                + " z: " + (translation[2] | 0)
-	                + "<br/>"
-	                + " yaw: " + Math.round(-yaw * 180.0/Math.PI)
-	                + " pitch: " + Math.round(-pitch * 180.0/Math.PI)
-	                + " roll: " + Math.round(roll * 180.0/Math.PI);
-	},
-
-	evaluate: function(generatedCode){ //Change to something like newUpdateBehaviour ?
-										//or setUpdateBehaviour ?
-		var openfunction, closefunction;
-		openfunction = "this.updateScene = function() {";
-						//"var corners, corner, pose, i,k;";
-						//"for (i=0; i<this.markers.length; ++i){";
-		generatedCode=openfunction+generatedCode;
-		closefunction = "this.updateObjects();"+
-						"this.texture.children[0].material.map.needsUpdate = true; };";
-		generatedCode+=closefunction;
+	/**
+	 * Function that incorporates the code generated by blockly into the update function
+	 */
+	evaluate: function(generatedCode){
+		generatedCode="this.updateScene = function() {"+generatedCode+"};";
 		console.log('generatedCode inside view iframe', generatedCode);
 		eval(generatedCode);
 	},
 
-	tick: function(){ //Change to Update ?
-		//if (video.readyState === video.HAVE_ENOUGH_DATA){
-			this.snapshot();
+	/**
+	 * Function that updates the state of the scene and renderer
+	 */
+	update: function(){
+		if (this.source.readyState === this.source.HAVE_ENOUGH_DATA){
+			//snapshot
+			this.context.drawImage(this.source, 0, 0, this.canvas.width, this.canvas.height);
+			this.imageData = this.context.getImageData(0,0,this.canvas.width,this.canvas.height);
+
 			this.ARl.detectSignals(this.imageData);
 			this.updateScene();
-			//render();
+			//updateObjects
+			for (var i in this.map)
+	    		this.map[i].update();
+
+	    	this.texture.children[0].material.map.needsUpdate = true;
+			//render
 			this.renderer.autoClear = false;
   			this.renderer.clear();
   			this.renderer.render(this.scene, this.camera);
-		//}
-		//window.requestAnimationFrame(this.tick());
+		}
 	},
 
+	/*
+	 * Function that allows the addition of external elements to the scene
+	 */
+	sceneAdd: function(object){
+		this.scene.add(object);
+	},
+
+	/****************************************************************************************************
+	 * BLOCKLY FUNCTIONS
+	 ***************************************************************************************************/
 	setObjectMarker: function(object, marker_id){ //WITH THE NEW ONES THIS WILL BE DEPRECATED!!!!!!!!!!!!
 		var pose = this.ARl.getPose(marker_id);
 		var rotation = pose.bestRotation;
@@ -219,31 +220,28 @@ ARC.prototype = {
 			this.scene.add(this.map[object]);
 		}
 		this.map[object].setScale(35.0,35.0,35.0);
-	    //this.map[object].setRotation()
-	    this.map[object].rotation.x = -Math.asin(-rotation[1][2]);
-	    this.map[object].rotation.y = -Math.atan2(rotation[0][2], rotation[2][2]);
-	    this.map[object].rotation.z = Math.atan2(rotation[1][0], rotation[1][1]);
-
-	    this.map[object].position.x = translation[0];
-	    this.map[object].position.y = translation[1];
-	    this.map[object].position.z = -translation[2];
+	    this.map[object].setBasePose(translation[0],translation[1],-translation[2],
+	    							-Math.asin(-rotation[1][2]),
+	    							-Math.atan2(rotation[0][2], rotation[2][2]),
+	    							Math.atan2(rotation[1][0], rotation[1][1]));
 	},
 
 	runAnimation: function(animation, object){ 
-	//THIS WITH THE PREVIOUS ONE AND THE NEW ONES SHOULD BE A SEPARATED CATEGORY OF FUNCTIONS!!!!!!!!!!!!!!!!!!!!
+		//check for an animate function
+
 		if(!this.amap[animation]){
 			var ramap = this.amap;
 			$.ajax({url: "./models/"+animation+".js", dataType: "script", async: false,
 			success: function(){
-				ramap[animation]=animate;
-				console.log("Creating new animation "+animation);
+				var tempanim=new Animation();
+				if(tempanim.implements("animate")){
+    				ramap[animation]=tempanim;
+    				console.log("Creating new animation "+animation);
+				}else
+    				throw new missingFunctionsError(animation,"animate"); //COULD BE BETTER
 			}});
 		}
-		this.amap[animation](this.map[object]);
-	},
-
-	sceneAdd: function(object){
-		this.scene.add(object);
+		this.amap[animation].animate(this.map[object]);
 	}
 };
 
