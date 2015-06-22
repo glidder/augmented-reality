@@ -1,15 +1,14 @@
 /**
-* Augmented Reality Coordinator Library (ARC)
-*/
+ * Augmented Reality Coordinator Library (ARC)
+ */
 
-/*
-* Function that checks if an object implements the indicated functions
-* It is used to check the implementation of an ARC "interface".
-*/
+/**
+ * Function that checks if an object implements the indicated functions
+ * It is used to check the implementation of an ARC "interface".
+ */
 Object.defineProperty(Object.prototype, 'implements', {
     enumerable: false,
     value: function(methods) {
-        //return (typeof this[method] === 'function');
         for(methodName in methods){
         	if(typeof this[methods[methodName]] != 'function') {
             	return false;
@@ -227,13 +226,12 @@ ARC.prototype = {
 	},
 
 	runAnimation: function(animation, object){ 
-		//check for an animate function
-
 		if(!this.amap[animation]){
 			var ramap = this.amap;
 			$.ajax({url: "./models/"+animation+".js", dataType: "script", async: false,
 			success: function(){
 				var tempanim=new Animation();
+				//check for an animate function
 				if(tempanim.implements("animate")){
     				ramap[animation]=tempanim;
     				console.log("Creating new animation "+animation);
