@@ -6,7 +6,7 @@
     <script type="text/javascript" src="js/Blockly/blocks_compressed.js"></script>
     <script type="text/javascript" src="js/Blockly/javascript_compressed.js"></script>
     <script type="text/javascript" src="js/Blockly/msg/js/en.js"></script>
-    <script type="text/javascript" src="js/Custom/arblocks.js"></script>
+    <script type="text/javascript" src="js/ARCblocks.js"></script>
     <style>
       html, body {
         background-color: #fff;
@@ -35,8 +35,8 @@
   </head>
   <body onload="init()">
     <xml id="toolbox" style="display: none">
-      <!-- Minecraft Category -->
-      <category name='Skarf'>
+      <!-- ARC Category -->
+      <category name='Signals'>
         <block type="marker">
         	<value name="id">
         		<block type="math_number">
@@ -56,14 +56,27 @@
         		</block>
         	</value>
         </block>
+          <block type="animate">
+        	<value name="animation">
+        		<block type="text">
+        			<field name="TEXT">animation_rotate</field>
+        		</block>
+        	</value>
+        	<value name="obj">
+        		<block type="text">
+        			<field name="TEXT">house_15</field>
+        		</block>
+        	</value>
+        </block>
       </category>
-      <category name='Datos'>
-		<block type="math_number">
-			<field name="NUM">446</field>
-        </block>
-        <block type="text">
-        	<field name="TEXT">house_15</field>
-        </block>
+      <!-- Data category -->
+      <category name='Data'>
+    		<block type="math_number">
+    			<field name="NUM">446</field>
+            </block>
+            <block type="text">
+            	<field name="TEXT">house_15</field>
+            </block>
       </category>
     </xml>
   </body>

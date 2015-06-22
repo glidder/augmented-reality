@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>skarf.js - Track Three.js Scene</title>
+    <meta charset="UTF-8" />
+
+    <link href='http://fonts.googleapis.com/css?family=Fauna+One' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!--load helper libraries-->
+    <script type="text/javascript" src="js/jquery/jquery-2.0.2.min.js"></script>
+
+    <!--load 3D libraries-->
+    <script type="text/javascript" src="js/threejs/three.min.js"></script>
+
+    <!--load AR libraries-->
+    <script type="text/javascript" src="js/js-aruco/svd.js"></script>
+    <script type="text/javascript" src="js/js-aruco/posit2.js"></script>
+    <script type="text/javascript" src="js/js-aruco/cv.js"></script>
+    <script type="text/javascript" src="js/js-aruco/aruco.js"></script>
+    <script type="text/javascript" src="js/ArucoInterface.js"></script>
+
+    <!--load augmented reality coordinator library-->
+    <script type="text/javascript" src="js/ARC.js"></script>
+
+    <script>
+    var video, arc;
+    
+    /**
+     * Function that starts the execution once the page is loaded
+     */
+    function onLoad(){
+      video = document.getElementById("video");
+      
+      navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      if (navigator.getUserMedia){
+        init();
+      }
+    };
+    
+    /**
+     * Initialisation function
+     */
+    function init(){
+
+      //Stablishing the video stream
+      navigator.getUserMedia({video:true}, 
+        function (stream){
+          if (window.webkitURL) {
+            video.src = window.webkitURL.createObjectURL(stream);
+          } else if (video.mozSrcObject !== undefined) {
+            video.mozSrcObject = stream;
+          } else {
+            video.src = stream;
+          }
+        },
+        function(error){
+        }
+      );
+
+      //Creating the ARC object
+      var canvas = document.getElementById("canvas"),
+          container = document.getElementById("container"),
+          ARlibrary = new ArucoInterface(35.0, parseInt(canvas.style.width), parseInt(canvas.style.height));
+
+      arc = new ARC(video,canvas,container,ARlibrary);
+      //For testing purposes, comment the previous line and uncomment the following two
+      //      var image = document.getElementById("image");
+      //      arc = new ARC(image,canvas,container,ARlibrary);
+
+      //Start the main loop
+      window.requestAnimationFrame(loop);
+    };
+    
+    /**
+     * Main loop function
+     */
+    function loop(){
+      arc.update();
+      requestAnimationFrame(loop);
+    }
+
+    /**
+     * Run button function
+     * Incorporates the generated code to the main loop by evaluating it from the ARC object.
+     */
+    window.run = function run(generatedCode){
+        arc.evaluate(generatedCode);
+    }
+
+    window.onload = onLoad;
+    </script>
+</head>
+
+<body>
+	<video id="video" width=640 height=480 autoplay="true" style="display:none;"></video>
+	<img id="image" width=640 height=480 src="test.png" style="display:none;"></img>
+	<div style="width: 100%;">
+    <div style="width: 650px; margin-left:auto; margin-right:auto;">
+    <div class="invisible">
+    	<canvas id="canvas" style="width: 640px; height: 480px; float: left; border: solid 1px black;"></canvas></div>
+      <div id="container" style="width: 640px; height: 480px; float: left; border: solid 1px black; background: green;"></div>
+    </div>
+  </div>
+</body>
+
+</html>
