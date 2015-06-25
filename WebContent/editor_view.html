@@ -64,10 +64,10 @@
           container = document.getElementById("container"),
           ARlibrary = new ArucoInterface(35.0, parseInt(canvas.style.width), parseInt(canvas.style.height));
 
-      arc = new ARC(video,canvas,container,ARlibrary);
+      //arc = new ARC(video,canvas,container,ARlibrary);
       //For testing purposes, comment the previous line and uncomment the following two
-      //      var image = document.getElementById("image");
-      //      arc = new ARC(image,canvas,container,ARlibrary);
+            var image = document.getElementById("image");
+            arc = new ARC(image,canvas,container,ARlibrary);
 
       //Start the main loop
       window.requestAnimationFrame(loop);

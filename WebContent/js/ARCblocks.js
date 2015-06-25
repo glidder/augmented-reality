@@ -18,7 +18,7 @@ Blockly.JavaScript['marker'] = function(block) {
   var value_id = Blockly.JavaScript.valueToCode(block, 'id', Blockly.JavaScript.ORDER_ATOMIC);
   var statements_consequence = Blockly.JavaScript.statementToCode(block, 'consequence');
   // TODO: Assemble JavaScript into code variable.
-  var code = 'if(this.ARl.findSignalById('+value_id+')>=0){'+
+  var code = 'if(this.ARl.signalIsActive('+value_id+')){'+'this.signalIsRotated('+value_id+',\"right\");'+
   				statements_consequence+'}';
   return code;
 };
@@ -48,9 +48,9 @@ Blockly.JavaScript['load'] = function(block) {
   var value_obj = Blockly.JavaScript.valueToCode(block, 'obj', Blockly.JavaScript.ORDER_ATOMIC);
   var value_id = Blockly.JavaScript.valueToCode(block, 'id', Blockly.JavaScript.ORDER_ATOMIC);
   // TODO: Assemble JavaScript into code variable.
-  var code = 	'var k=this.ARl.findSignalById('+value_id+');'+
+  var code = 	'var k=this.ARl.getSignalIndexById('+value_id+');'+
   				'if(k>=0){'+
-  				'this.setObjectMarker('+value_obj+',k);}';
+  				'this.setObjectMarker('+value_obj+','+value_id+');}';
   return code;
 };
 

@@ -156,7 +156,7 @@ function ARC(source,canvas,container,/*camera,*/ARlibrary){
      * thus it's defined as a variable and not as a prototype.
      */
     this.updateScene = function(){
-  		console.log("Active signals: ",this.ARl.getActiveSignalsId().toString());
+  		console.log("Active signals: ",this.ARl.getActiveSignalList().toString());
     };
 };
 ARC.prototype = {
@@ -164,7 +164,7 @@ ARC.prototype = {
 	 * Function that returns a list of the names of all necessary methods for ARlibrary
 	 */
 	listInterface: function(){//IMPLEMENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		return ["getActiveSignalsId","detectSignals","getPose"];
+		return ["getActiveSignalList","detectSignals","getPose"];
 	},
 
 	/**
@@ -209,20 +209,85 @@ ARC.prototype = {
 	/****************************************************************************************************
 	 * BLOCKLY FUNCTIONS
 	 ***************************************************************************************************/
+	/**
+	 * Modelos Básicos de Interacción
+	 ********************************/
+	/**
+	 * Function that checks if a signal has just appeared in scene
+	 */
+	signalIsNew: function(signal_id){
+		return (this.ARl.signalIsActive(signal_id) && !this.Arl.signalWasActive(signal_id));
+	},
+
+	/**
+	 * Function that checks if a signal has just disappear from scene
+	 */
+	signalIsGone: function(signal_id){
+		return (this.ARl.signalWasActive(signal_id) && !this.ARl.signalIsActive(signal_id));
+	},
+
+	/**
+	 * Function that checks if a signal has rotated
+	 */
+	signalIsRotated: function(signal_id, direction){
+		var currentpose = this.ARl.getPose(signal_id),
+			previouspose = this.ARl.getPreviousPose(signal_id),
+			rotationz = previouspose.rotation.z - currentpose.rotation.z;
+
+		if(rotationz>0.1 || rotationz<-0.1){
+			console.log("\nROTATIOOOOOON: "+rotationz+"\n");
+			if(direction=='right'){
+				console.log("RIIIIGHT");
+				return (rotationz>0);
+			}else{
+				return (rotationz<0);
+			}
+		}
+	},
+
+	/**
+	 * Function that checks if a signal has been turned over
+	 */
+	signalIsTurnedOver: function(signal_id){
+
+	},
+
+	/**
+	 * Function that checks if two signals are touching
+	 */
+	signalIsTouching: function(signal_a, signal_b){
+		var apose = this.ARl.getPose(signal_a),
+			bpose = this.ARl.getPose(signal_b);
+	},
+
+	/**
+	 * Function that checks if a signal has moved
+	 */
+	signalHasMoved: function(signal_id){
+		var currentpose = this.ARl.getPose(signal_id),
+			previouspose = this.ARl.getPreviousPose(signal_id);
+
+		return ((currentpose.translation.x - previouspose.translation.x) +
+				(currentpose.translation.y - previouspose.translation.y) +
+				(currentpose.translation.z - previouspose.translation.z)) > 4; //CREATE [GLOBAL?] THRESHOLD!!
+	},
+
 	setObjectMarker: function(object, marker_id){ //WITH THE NEW ONES THIS WILL BE DEPRECATED!!!!!!!!!!!!
 		var pose = this.ARl.getPose(marker_id);
-		var rotation = pose.bestRotation;
-		var translation = pose.bestTranslation;
+		var rotation = pose.rotation;
+		var translation = pose.translation;
 		if(!this.map[object]){
 			console.log("Creating new model "+object);
 			this.map[object]=new Model(object);
 			this.scene.add(this.map[object]);
 		}
 		this.map[object].setScale(35.0,35.0,35.0);
-	    this.map[object].setBasePose(translation[0],translation[1],-translation[2],
+	    /*this.map[object].setBasePose(translation[0],translation[1],-translation[2],
 	    							-Math.asin(-rotation[1][2]),
 	    							-Math.atan2(rotation[0][2], rotation[2][2]),
-	    							Math.atan2(rotation[1][0], rotation[1][1]));
+	    							Math.atan2(rotation[1][0], rotation[1][1]));*/
+		this.map[object].setBasePose(translation.x,translation.y,translation.z,
+	    							rotation.x,rotation.y,rotation.z);
 	},
 
 	runAnimation: function(animation, object){ 
